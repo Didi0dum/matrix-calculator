@@ -11,7 +11,7 @@ typedef struct{
 } Matrix;
 
 Matrix* init_matrix(char*, double*, uint, uint);
-Matrix* multiply_by_scalar(Matrix*, double);
+void multiply_by_scalar(Matrix*, double);
 Matrix* multiply_by_matrix(Matrix*, Matrix*);
 Matrix* divide_by_scalar(Matrix*, double);
 Matrix* inverse_matrix(Matrix*);
