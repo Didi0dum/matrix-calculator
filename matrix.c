@@ -144,18 +144,21 @@ double find_the_determinant(Matrix* arg_matrix){
         printf("Passing a matrix that isn't square (find_the_determinant)!☆\n");
         exit(1);
     }
-    
+
+    Matrix* temp_matrix = init_matrix(arg_matrix->alias, arg_matrix->matrix, arg_matrix->number_of_rows, arg_matrix->number_of_cols);
+
     double determinant = 1;
 
-    int number_of_swaps = gaussian_elimination(arg_matrix);
+    int number_of_swaps = gaussian_elimination(temp_matrix);
     if(number_of_swaps == -1){
         return 0;
     }
 
-    for(int i = 0; i < arg_matrix->number_of_cols; i++){
-        determinant *= arg_matrix->matrix[i*arg_matrix->number_of_cols + i];
+    for(int i = 0; i < temp_matrix->number_of_cols; i++){
+        determinant *= temp_matrix->matrix[i*temp_matrix->number_of_cols + i];
     }
     determinant *= pow(-1, number_of_swaps);
+    free_matrix(temp_matrix);
     return determinant;
 }
 
@@ -163,6 +166,7 @@ void print_matrix(Matrix*){
 
 }
 
-void free_matrix(Matrix*){
-
+void free_matrix(Matrix* arg_matrix){
+    free(arg_matrix->matrix);
+    free(arg_matrix);
 }
