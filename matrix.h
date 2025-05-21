@@ -16,6 +16,7 @@ Matrix* multiply_by_matrix(Matrix*, Matrix*);
 Matrix* divide_by_scalar(Matrix*, double);
 Matrix* inverse_matrix(Matrix*);
 Matrix* transpose_matrix(Matrix*);
+int gaussian_elimination(Matrix*);
 double find_the_determinant(Matrix*);
 void print_matrix(Matrix*);
 void free_matrix(Matrix*);

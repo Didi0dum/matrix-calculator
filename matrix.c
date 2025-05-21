@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "matrix.h"
 
 Matrix* init_matrix(char* arg_alias, double* arg_matrix_array, uint arg_number_of_rows, uint arg_number_of_cols){
@@ -106,8 +107,56 @@ Matrix* transpose_matrix(Matrix* arg_matrix){
 
 }
 
-double find_the_determinant(Matrix* arg_matrix){
+int gaussian_elimination(Matrix* arg_matrix){
+    int number_of_swaps = 0;
+    for(int i = 0; i < arg_matrix->number_of_rows; i++){
+        for(int k = i + 1; k < arg_matrix->number_of_rows; k++){
+            if(fabs(arg_matrix->matrix[i*arg_matrix->number_of_cols + i]) 
+            < fabs(arg_matrix->matrix[k*arg_matrix->number_of_cols + i])){
+                ++number_of_swaps;
+                for(int j = 0; j < arg_matrix->number_of_cols; j++){
+                    double temp;
+                    temp = arg_matrix->matrix[i*arg_matrix->number_of_cols + j];
+                    arg_matrix->matrix[i*arg_matrix->number_of_cols + j] =  
+                    arg_matrix->matrix[k*arg_matrix->number_of_cols + j];
 
+                    arg_matrix->matrix[k*arg_matrix->number_of_cols + j] = temp;
+                }
+            }
+        }
+
+        double pivot = arg_matrix->matrix[i*arg_matrix->number_of_cols + i];
+        if(fabs(pivot) < 1e-10) return -1;
+
+        for(int k = i + 1; k < arg_matrix->number_of_rows; k++){
+            double term = arg_matrix->matrix[k*arg_matrix->number_of_cols + i] / pivot;
+            for(int j = 0; j < arg_matrix->number_of_cols; j++){
+                arg_matrix->matrix[k*arg_matrix->number_of_cols + j] -= term*arg_matrix->matrix[i*arg_matrix->number_of_cols + j];
+            }
+        }
+    }
+
+    return number_of_swaps;
+}
+
+double find_the_determinant(Matrix* arg_matrix){
+    if(arg_matrix->number_of_cols != arg_matrix->number_of_rows){
+        printf("Passing a matrix that isn't square (find_the_determinant)!☆\n");
+        exit(1);
+    }
+    
+    double determinant = 1;
+
+    int number_of_swaps = gaussian_elimination(arg_matrix);
+    if(number_of_swaps == -1){
+        return 0;
+    }
+
+    for(int i = 0; i < arg_matrix->number_of_cols; i++){
+        determinant *= arg_matrix->matrix[i*arg_matrix->number_of_cols + i];
+    }
+    determinant *= pow(-1, number_of_swaps);
+    return determinant;
 }
 
 void print_matrix(Matrix*){
