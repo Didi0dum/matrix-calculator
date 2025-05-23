@@ -6,6 +6,8 @@
 
 /* TODO: Correct matrix passed check to all of the functions */
 
+#define APROX_ZERO 1e-10
+
 Matrix* init_matrix(char* arg_alias, double* arg_matrix_array, uint arg_number_of_rows, uint arg_number_of_cols){
     Matrix* temp_matrix = (Matrix*)malloc(sizeof(Matrix));
     if(temp_matrix == NULL){
@@ -98,8 +100,11 @@ Matrix* multiply_by_matrix(Matrix* arg_matrix_1, Matrix* arg_matrix_2){
 }
 
 Matrix* divide_by_scalar(Matrix* arg_matrix, double arg_scalar){
-    fprintf(stderr, "Not implemented: %s\n", __func__);
-    return NULL;
+     for(int i = 0; i < arg_matrix->number_of_rows; i++){
+        for(int j = 0; j < arg_matrix->number_of_cols; j++){
+            arg_matrix->matrix[i*arg_matrix->number_of_cols + j] /= arg_scalar;
+        }
+    }
 }
 
 Matrix* inverse_matrix(Matrix* arg_matrix){
@@ -131,7 +136,7 @@ int gaussian_elimination(Matrix* arg_matrix){
         }
 
         double pivot = arg_matrix->matrix[i*arg_matrix->number_of_cols + i];
-        if(fabs(pivot) < 1e-10) return -1;
+        if(fabs(pivot) < APROX_ZERO) return -1;
 
         for(int k = i + 1; k < arg_matrix->number_of_rows; k++){
             double term = arg_matrix->matrix[k*arg_matrix->number_of_cols + i] / pivot;
