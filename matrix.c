@@ -4,22 +4,24 @@
 #include <math.h>
 #include "matrix.h"
 
+/* TODO: Correct matrix passed check to all of the functions */
+
 Matrix* init_matrix(char* arg_alias, double* arg_matrix_array, uint arg_number_of_rows, uint arg_number_of_cols){
     Matrix* temp_matrix = (Matrix*)malloc(sizeof(Matrix));
     if(temp_matrix == NULL){
-        printf("Trouble allocating memory for matrix (init_matrix)!☆\n");
+        fprintf(stderr, "Trouble allocating memory for matrix (%s)!☆\n", __func__);
         exit(1);
     }
 
     temp_matrix->alias = malloc(strlen(arg_alias) + 1);
     if (temp_matrix->alias == NULL){
-        printf("Trouble allocating memory for alias!☆\n");
+        fprintf(stderr, "Trouble allocating memory for alias!☆\n");
         exit(1);
     }
     memcpy(temp_matrix->alias, arg_alias, strlen(arg_alias) + 1);
 
     if(arg_number_of_rows <= 0 || arg_number_of_cols <= 0){
-        printf("Invalid argument (init_matrix)!☆\n");
+        fprintf(stderr, "Invalid argument (%s)!☆\n", __func__);
         exit(1);
     }
     temp_matrix->number_of_rows = arg_number_of_rows;
@@ -27,7 +29,7 @@ Matrix* init_matrix(char* arg_alias, double* arg_matrix_array, uint arg_number_o
 
     temp_matrix->matrix = (double*)malloc(sizeof(double)*temp_matrix->number_of_cols*temp_matrix->number_of_rows);
     if(temp_matrix->matrix == NULL){
-        printf("Trouble allocating memory for matrix array (init_matrix)!☆\n");
+        fprintf(stderr, "Trouble allocating memory for matrix array (%s)!☆\n", __func__);
         exit(1);
     }
     for(int i = 0; i < temp_matrix->number_of_rows; i++){
@@ -52,13 +54,13 @@ void multiply_by_scalar(Matrix* arg_matrix, double arg_scalar){
 
 Matrix* multiply_by_matrix(Matrix* arg_matrix_1, Matrix* arg_matrix_2){
     if(arg_matrix_1->number_of_cols != arg_matrix_2->number_of_rows){
-        printf("Cannot multiply matrices (multiply_by_matrix)!☆\n");
+        fprintf(stderr,"Cannot multiply matrices (%s)!☆\n", __func__);
         exit(1);
     }
 
     Matrix* new_matrix = (Matrix*)malloc(sizeof(Matrix));
     if(new_matrix == NULL){
-        printf("Trouble allocating memory for matrix (multiply_by_matrix)!☆\n");
+        fprintf(stderr,"Trouble allocating memory for matrix (%s)!☆\n", __func__);
         exit(1);
     }
 
@@ -67,7 +69,7 @@ Matrix* multiply_by_matrix(Matrix* arg_matrix_1, Matrix* arg_matrix_2){
 
     new_matrix->matrix = (double*)malloc(sizeof(double)*new_matrix->number_of_rows*new_matrix->number_of_cols);
     if(new_matrix->matrix == NULL){
-        printf("Trouble allocating memory for matrix array (multiply_by_matrix)!☆\n");
+        fprintf(stderr,"Trouble allocating memory for matrix array (%s)!☆\n", __func__);
         exit(1);
     }
 
@@ -85,7 +87,7 @@ Matrix* multiply_by_matrix(Matrix* arg_matrix_1, Matrix* arg_matrix_2){
     size_t len2 = strlen(arg_matrix_2->alias);
     new_matrix->alias = (char*)malloc(len1 + len2 + 2);
     if(new_matrix->alias == NULL){
-        printf("Trouble allocating memory for matrix alias (multiply_by_matrix)!☆\n");
+        fprintf(stderr, "Trouble allocating memory for matrix alias (%s)!☆\n", __func__);
         exit(1);
     }
     memcpy(new_matrix->alias, arg_matrix_1->alias, len1);
@@ -96,15 +98,18 @@ Matrix* multiply_by_matrix(Matrix* arg_matrix_1, Matrix* arg_matrix_2){
 }
 
 Matrix* divide_by_scalar(Matrix* arg_matrix, double arg_scalar){
-
+    fprintf(stderr, "Not implemented: %s\n", __func__);
+    return NULL;
 }
 
 Matrix* inverse_matrix(Matrix* arg_matrix){
-
+    fprintf(stderr, "Not implemented: %s\n", __func__);
+    return NULL;
 }
 
 Matrix* transpose_matrix(Matrix* arg_matrix){
-
+    fprintf(stderr, "Not implemented: %s\n", __func__);
+    return NULL;
 }
 
 int gaussian_elimination(Matrix* arg_matrix){
@@ -141,7 +146,7 @@ int gaussian_elimination(Matrix* arg_matrix){
 
 double find_the_determinant(Matrix* arg_matrix){
     if(arg_matrix->number_of_cols != arg_matrix->number_of_rows){
-        printf("Passing a matrix that isn't square (find_the_determinant)!☆\n");
+        fprintf(stderr, "Passing a matrix that isn't square (%s)!☆\n", __func__);
         exit(1);
     }
 
@@ -160,10 +165,6 @@ double find_the_determinant(Matrix* arg_matrix){
     determinant *= pow(-1, number_of_swaps);
     free_matrix(temp_matrix);
     return determinant;
-}
-
-void print_matrix(Matrix*){
-
 }
 
 void free_matrix(Matrix* arg_matrix){
