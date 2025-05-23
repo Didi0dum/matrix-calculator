@@ -99,7 +99,7 @@ Matrix* multiply_by_matrix(Matrix* arg_matrix_1, Matrix* arg_matrix_2){
     return new_matrix;
 }
 
-Matrix* divide_by_scalar(Matrix* arg_matrix, double arg_scalar){
+void divide_by_scalar(Matrix* arg_matrix, double arg_scalar){
      for(int i = 0; i < arg_matrix->number_of_rows; i++){
         for(int j = 0; j < arg_matrix->number_of_cols; j++){
             arg_matrix->matrix[i*arg_matrix->number_of_cols + j] /= arg_scalar;

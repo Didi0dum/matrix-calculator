@@ -14,7 +14,7 @@ Matrix* init_matrix(char*, double*, uint, uint);
 void    free_matrix(Matrix*);
 
 void    multiply_by_scalar(Matrix*, double);
-Matrix* divide_by_scalar(Matrix*, double);
+void divide_by_scalar(Matrix*, double);
 Matrix* multiply_by_matrix(Matrix*, Matrix*);
 Matrix* inverse_matrix(Matrix*);
 Matrix* transpose_matrix(Matrix*);
