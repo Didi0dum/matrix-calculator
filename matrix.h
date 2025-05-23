@@ -4,21 +4,25 @@
 typedef unsigned int uint;
 
 typedef struct{
-    char* alias;
+    char*   alias;
     double* matrix;
-    uint number_of_rows;
-    uint number_of_cols;
+    uint    number_of_rows;
+    uint    number_of_cols;
 } Matrix;
 
 Matrix* init_matrix(char*, double*, uint, uint);
-void multiply_by_scalar(Matrix*, double);
-Matrix* multiply_by_matrix(Matrix*, Matrix*);
+void    free_matrix(Matrix*);
+
+void    multiply_by_scalar(Matrix*, double);
 Matrix* divide_by_scalar(Matrix*, double);
+Matrix* multiply_by_matrix(Matrix*, Matrix*);
 Matrix* inverse_matrix(Matrix*);
 Matrix* transpose_matrix(Matrix*);
-int gaussian_elimination(Matrix*);
-double find_the_determinant(Matrix*);
+
+int     gaussian_elimination(Matrix*);
+double  find_the_determinant(Matrix*);
+
+/* TODO: move definition to header, related to I/O */
 void print_matrix(Matrix*);
-void free_matrix(Matrix*);
 
 #endif
