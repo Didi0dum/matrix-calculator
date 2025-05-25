@@ -22,7 +22,4 @@ Matrix* transpose_matrix(Matrix*);
 int     gaussian_elimination(Matrix*);
 double  find_the_determinant(Matrix*);
 
-/* TODO: move definition to header, related to I/O */
-void print_matrix(Matrix*);
-
 #endif

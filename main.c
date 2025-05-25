@@ -1,10 +1,11 @@
-#include "matrix.h"
 #include <stdio.h>
-#include <stdlib.h>
+
+#include "matrix.h"
+#include "io.h"
 
 int main() {
-  double data[4] = {1, 2, 3, 4};
-  Matrix *m1 = init_matrix("test_matrix", data, 2, 2);
+
+  Matrix *m1 = input_matrix();
   print_matrix(m1);
 
   multiply_by_scalar(m1, 2.0);
