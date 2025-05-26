@@ -15,11 +15,11 @@ void    free_matrix(Matrix*);
 
 void    multiply_by_scalar(Matrix*, double);
 void divide_by_scalar(Matrix*, double);
-Matrix* multiply_by_matrix(Matrix*, Matrix*);
-Matrix* inverse_matrix(Matrix*);
-Matrix* transpose_matrix(Matrix*);
+Matrix* multiply_by_matrix(const Matrix*, const Matrix*);
+Matrix* inverse_matrix(const Matrix*);
+Matrix* transpose_matrix(const Matrix*);
 
 int     gaussian_elimination(Matrix*);
-double  find_the_determinant(Matrix*);
+double  find_the_determinant(const Matrix*);
 
 #endif
