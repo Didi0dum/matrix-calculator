@@ -110,37 +110,6 @@ void divide_by_scalar(Matrix* arg_matrix, double arg_scalar){
     }
 }
 
-Matrix* inverse_matrix(const Matrix* arg_matrix){
-    fprintf(stderr, "Not implemented: %s\n", __func__);
-    return NULL;
-}
-
-Matrix* transpose_matrix(const Matrix* arg_matrix){
-    double* new_matrix_array = (double*)malloc(arg_matrix->number_of_cols*arg_matrix->number_of_rows*sizeof(double));
-    if(new_matrix_array == NULL){
-        fprintf(stderr, "Trouble allocating memory for matrix array (%s)!☆\n", __func__);
-        exit(1);
-    }
-
-    for(int i = 0; i < arg_matrix->number_of_rows; i++){
-        for(int j = 0; j < arg_matrix->number_of_cols; j++){
-            new_matrix_array[j*arg_matrix->number_of_rows + i] = arg_matrix->matrix[i*arg_matrix->number_of_cols + j];
-        }
-    }
-
-    char* new_alias = (char*)malloc(sizeof(char)*(strlen(arg_matrix->alias) + 3));
-    if(new_alias == NULL){
-         fprintf(stderr, "Trouble allocating memory for matrix alias (%s)!☆\n", __func__);
-         exit(1);
-    }
-
-    memcpy(new_alias, arg_matrix->alias, strlen(arg_matrix->alias));
-    memcpy(&new_alias[strlen(arg_matrix->alias)], "^T\0", 3);
-
-    Matrix* new_matrix = init_matrix(new_alias, new_matrix_array, arg_matrix->number_of_cols, arg_matrix->number_of_rows);
-    return new_matrix;
-}
-
 int gaussian_elimination(Matrix* arg_matrix){
     int number_of_swaps = 0;
     for(int i = 0; i < arg_matrix->number_of_rows; i++){
@@ -196,7 +165,124 @@ double find_the_determinant(const Matrix* arg_matrix){
     return determinant;
 }
 
+double minor_matrix_determinant(const Matrix* arg_matrix, int arg_row, int arg_col){
+    if(arg_matrix->number_of_rows != arg_matrix->number_of_cols){
+        fprintf(stderr, "Passing a matrix that isn't square (%s)!☆\n", __func__);
+        exit(1);
+    }
+    Matrix* return_matrix = NULL;
+    int new_rows = arg_matrix->number_of_rows - 1, new_cols = arg_matrix->number_of_cols - 1;
+    double* buffer = (double*)malloc(sizeof(double)*new_rows*new_cols);
+    char* new_alias = (char*)malloc(sizeof(char)*(strlen(arg_matrix->alias) + strlen("_minor") + 1));
+
+    memcpy(new_alias, arg_matrix->alias, strlen(arg_matrix->alias));
+    memcpy(&new_alias[strlen(arg_matrix->alias)], "_minor\0", strlen("_minor") + 1);
+
+    int minor_i = 0;
+    for(int i = 0; i < arg_matrix->number_of_rows; i++){
+        if(i == arg_row){
+            continue;
+        }
+
+        int minor_j = 0;
+        for(int j = 0; j < arg_matrix->number_of_cols; j++){
+            if(j == arg_col){
+                continue;
+            }
+            buffer[minor_i*new_cols + minor_j] = arg_matrix->matrix[i*arg_matrix->number_of_cols + j];
+            minor_j++;
+        }
+        minor_i++;
+    }
+
+    return_matrix = init_matrix(new_alias, buffer, new_rows, new_cols);
+    double minor_determinant = find_the_determinant(return_matrix);
+
+    free(new_alias);
+    free(buffer);
+    free(return_matrix);
+
+    return minor_determinant;
+}
+
+Matrix* transpose_matrix(const Matrix* arg_matrix){
+    double* new_matrix_array = (double*)malloc(arg_matrix->number_of_cols*arg_matrix->number_of_rows*sizeof(double));
+    if(new_matrix_array == NULL){
+        fprintf(stderr, "Trouble allocating memory for matrix array (%s)!☆\n", __func__);
+        exit(1);
+    }
+
+    for(int i = 0; i < arg_matrix->number_of_rows; i++){
+        for(int j = 0; j < arg_matrix->number_of_cols; j++){
+            new_matrix_array[j*arg_matrix->number_of_rows + i] = arg_matrix->matrix[i*arg_matrix->number_of_cols + j];
+        }
+    }
+
+    char* new_alias = (char*)malloc(sizeof(char)*(strlen(arg_matrix->alias) + 3));
+    if(new_alias == NULL){
+         fprintf(stderr, "Trouble allocating memory for matrix alias (%s)!☆\n", __func__);
+         exit(1);
+    }
+
+    memcpy(new_alias, arg_matrix->alias, strlen(arg_matrix->alias));
+    memcpy(&new_alias[strlen(arg_matrix->alias)], "^T\0", 3);
+
+    Matrix* new_matrix = init_matrix(new_alias, new_matrix_array, arg_matrix->number_of_cols, arg_matrix->number_of_rows);
+
+    free(new_alias);
+    free(new_matrix_array);
+
+    return new_matrix;
+}
+
+Matrix* cofactor_matrix(const Matrix* arg_matrix){
+    if(arg_matrix->number_of_rows != arg_matrix->number_of_cols){
+        fprintf(stderr, "Passing a matrix that isn't square (%s)!☆\n", __func__);
+        exit(1);
+    }
+
+    Matrix* return_matrix = NULL;
+    int new_rows = arg_matrix->number_of_rows, new_cols = arg_matrix->number_of_cols;
+    double* buffer = (double*)malloc(sizeof(double)*new_rows*new_cols);
+    char* new_alias = (char*)malloc(sizeof(char)*(strlen(arg_matrix->alias) + strlen("_cofactor") + 1));
+
+    memcpy(new_alias, arg_matrix->alias, strlen(arg_matrix->alias));
+    memcpy(&new_alias[strlen(arg_matrix->alias)], "_cofactor\0", strlen("_cofactor") + 1);
+
+    for(int i = 0; i < arg_matrix->number_of_rows; i++){
+        for(int j = 0; j < arg_matrix->number_of_cols; j++){
+            double minor_det = minor_matrix_determinant(arg_matrix, i, j);
+            buffer[i*new_cols + j] = pow(-1, i + j) * minor_det;
+        }
+    }
+
+    return_matrix = init_matrix(new_alias, buffer, new_rows, new_cols);
+
+    free(new_alias);
+    free(buffer);
+
+    return return_matrix;
+}
+
+Matrix* inverse_matrix(const Matrix* arg_matrix){
+    Matrix* c_matrix = cofactor_matrix(arg_matrix);
+    Matrix* tc_matrix = transpose_matrix(c_matrix);
+    double determinant = find_the_determinant(arg_matrix);
+    if(fabs(determinant) < APROX_ZERO){
+         fprintf(stderr, "Cannot invert singular matrix (%s)!☆\n", __func__);
+         exit(1);
+    }
+
+    divide_by_scalar(tc_matrix, determinant);
+
+    free(c_matrix);
+
+    return tc_matrix;
+}
+
 void free_matrix(Matrix* arg_matrix){
-    free(arg_matrix->matrix);
-    free(arg_matrix);
+    if(arg_matrix){
+        free(arg_matrix->matrix);
+        free(arg_matrix);
+    }
 }

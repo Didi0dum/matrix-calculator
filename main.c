@@ -24,8 +24,8 @@ int main() {
 //   puts("Multiplication of m1 and transpose:");
 //   print_matrix(m4);
 
-  double det = find_the_determinant(m1);
-  printf("Determinant of m1: %lf\n", det);
+  // double det = find_the_determinant(m1);
+  // printf("Determinant of m1: %lf\n", det);
 
 //   Matrix *m5 = inverse_matrix(m1);
 //   if (m5) {
@@ -40,7 +40,7 @@ int main() {
 //   printf("After Gaussian elimination (status: %d):\n", status);
 //   print_matrix(m6);
 
-  free_matrix(m1);
+free_matrix(m1);
 //   free_matrix(m3);
 //   free_matrix(m4);
 //   free_matrix(m5);
