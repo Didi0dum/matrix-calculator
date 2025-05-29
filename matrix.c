@@ -173,7 +173,13 @@ double minor_matrix_determinant(const Matrix* arg_matrix, int arg_row, int arg_c
     Matrix* return_matrix = NULL;
     int new_rows = arg_matrix->number_of_rows - 1, new_cols = arg_matrix->number_of_cols - 1;
     double* buffer = (double*)malloc(sizeof(double)*new_rows*new_cols);
+    if(buffer ==NULL){
+        fprintf(stderr, "Trouble allocating memory for buffer (%s)!☆\n", __func__);
+    }
     char* new_alias = (char*)malloc(sizeof(char)*(strlen(arg_matrix->alias) + strlen("_minor") + 1));
+    if(new_alias == NULL){
+        fprintf(stderr, "Trouble allocating memory for new_alias (%s)!☆\n", __func__);
+    }
 
     memcpy(new_alias, arg_matrix->alias, strlen(arg_matrix->alias));
     memcpy(&new_alias[strlen(arg_matrix->alias)], "_minor\0", strlen("_minor") + 1);
@@ -244,7 +250,13 @@ Matrix* cofactor_matrix(const Matrix* arg_matrix){
     Matrix* return_matrix = NULL;
     int new_rows = arg_matrix->number_of_rows, new_cols = arg_matrix->number_of_cols;
     double* buffer = (double*)malloc(sizeof(double)*new_rows*new_cols);
+    if(buffer ==NULL){
+        fprintf(stderr, "Trouble allocating memory for buffer (%s)!☆\n", __func__);
+    }
     char* new_alias = (char*)malloc(sizeof(char)*(strlen(arg_matrix->alias) + strlen("_cofactor") + 1));
+    if(new_alias ==NULL){
+        fprintf(stderr, "Trouble allocating memory for buffer (%s)!☆\n", __func__);
+    }
 
     memcpy(new_alias, arg_matrix->alias, strlen(arg_matrix->alias));
     memcpy(&new_alias[strlen(arg_matrix->alias)], "_cofactor\0", strlen("_cofactor") + 1);
