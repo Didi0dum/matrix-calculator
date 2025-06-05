@@ -4,8 +4,6 @@
 #include <math.h>
 #include "matrix.h"
 
-/* TODO: Correct matrix passed check to all of the functions */
-
 #define APROX_ZERO 1e-10
 
 Matrix* init_matrix(char* arg_alias, double* arg_matrix_array, uint arg_number_of_rows, uint arg_number_of_cols){
@@ -45,6 +43,10 @@ Matrix* init_matrix(char* arg_alias, double* arg_matrix_array, uint arg_number_o
 }
 
 void multiply_by_scalar(Matrix* arg_matrix, double arg_scalar){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
 
     for(int i = 0; i < arg_matrix->number_of_rows; i++){
         for(int j = 0; j < arg_matrix->number_of_cols; j++){
@@ -55,6 +57,11 @@ void multiply_by_scalar(Matrix* arg_matrix, double arg_scalar){
 }
 
 Matrix* multiply_by_matrix(const Matrix* arg_matrix_1, const Matrix* arg_matrix_2){
+    if(!arg_matrix_1 || !arg_matrix_2){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
+
     if(arg_matrix_1->number_of_cols != arg_matrix_2->number_of_rows){
         fprintf(stderr,"Cannot multiply matrices (%s)!☆\n", __func__);
         exit(1);
@@ -100,9 +107,15 @@ Matrix* multiply_by_matrix(const Matrix* arg_matrix_1, const Matrix* arg_matrix_
 }
 
 void divide_by_scalar(Matrix* arg_matrix, double arg_scalar){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
+
     if(arg_scalar == 0){
         fprintf(stderr, "Attempted division by 0 (%s)\n", __func__);
     }
+
     for(int i = 0; i < arg_matrix->number_of_rows; i++){
         for(int j = 0; j < arg_matrix->number_of_cols; j++){
             arg_matrix->matrix[i*arg_matrix->number_of_cols + j] /= arg_scalar;
@@ -111,6 +124,11 @@ void divide_by_scalar(Matrix* arg_matrix, double arg_scalar){
 }
 
 int gaussian_elimination(Matrix* arg_matrix){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
+
     int number_of_swaps = 0;
     for(int i = 0; i < arg_matrix->number_of_rows; i++){
         for(int k = i + 1; k < arg_matrix->number_of_rows; k++){
@@ -143,6 +161,11 @@ int gaussian_elimination(Matrix* arg_matrix){
 }
 
 double find_the_determinant(const Matrix* arg_matrix){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
+
     if(arg_matrix->number_of_cols != arg_matrix->number_of_rows){
         fprintf(stderr, "Passing a matrix that isn't square (%s)!☆\n", __func__);
         exit(1);
@@ -166,10 +189,16 @@ double find_the_determinant(const Matrix* arg_matrix){
 }
 
 double minor_matrix_determinant(const Matrix* arg_matrix, int arg_row, int arg_col){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
+
     if(arg_matrix->number_of_rows != arg_matrix->number_of_cols){
         fprintf(stderr, "Passing a matrix that isn't square (%s)!☆\n", __func__);
         exit(1);
     }
+
     Matrix* return_matrix = NULL;
     int new_rows = arg_matrix->number_of_rows - 1, new_cols = arg_matrix->number_of_cols - 1;
     double* buffer = (double*)malloc(sizeof(double)*new_rows*new_cols);
@@ -212,6 +241,11 @@ double minor_matrix_determinant(const Matrix* arg_matrix, int arg_row, int arg_c
 }
 
 Matrix* transpose_matrix(const Matrix* arg_matrix){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
+
     double* new_matrix_array = (double*)malloc(arg_matrix->number_of_cols*arg_matrix->number_of_rows*sizeof(double));
     if(new_matrix_array == NULL){
         fprintf(stderr, "Trouble allocating memory for matrix array (%s)!☆\n", __func__);
@@ -242,6 +276,11 @@ Matrix* transpose_matrix(const Matrix* arg_matrix){
 }
 
 Matrix* cofactor_matrix(const Matrix* arg_matrix){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
+
     if(arg_matrix->number_of_rows != arg_matrix->number_of_cols){
         fprintf(stderr, "Passing a matrix that isn't square (%s)!☆\n", __func__);
         exit(1);
@@ -277,6 +316,10 @@ Matrix* cofactor_matrix(const Matrix* arg_matrix){
 }
 
 Matrix* inverse_matrix(const Matrix* arg_matrix){
+    if(!arg_matrix){
+        fprintf(stderr, "Passing NULL (%s)!☆\n", __func__);
+        exit(1);
+    }
     Matrix* c_matrix = cofactor_matrix(arg_matrix);
     Matrix* tc_matrix = transpose_matrix(c_matrix);
     double determinant = find_the_determinant(arg_matrix);
