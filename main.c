@@ -1,20 +1,24 @@
 #include <stdio.h>
 
+#include "crypt.h"
 #include "matrix.h"
 #include "io.h"
 
-int main() {
+int main(int argc, char *argv[]) {
 
   Matrix *m1 = input_matrix();
+  char* filename = "m1.matrix";
   print_matrix(m1);
+  printf("Saivng matrix to file %s\n", filename);
+  save_matrix(m1, filename);
 
-  multiply_by_scalar(m1, 2.0);
-  puts("After scalar multiplication by 2:");
-  print_matrix(m1);
+  // multiply_by_scalar(m1, 2.0);
+  // puts("After scalar multiplication by 2:");
+  // print_matrix(m1);
 
-  divide_by_scalar(m1, 2.0);
-  puts("After scalar division by 2 :");
-  print_matrix(m1);
+  // divide_by_scalar(m1, 2.0);
+  // puts("After scalar division by 2 :");
+  // print_matrix(m1);
 
 //   Matrix *m3 = transpose_matrix(m1);
 //   puts("Transpose of matrix:");

@@ -1,7 +1,11 @@
+#include <stdint.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+#include "io.h"
 #include "matrix.h"
 
 static int parse_double(const char* token, double* res) 
@@ -17,6 +21,7 @@ static int parse_double(const char* token, double* res)
 
   return 1;
 }
+
 
 static int process_line(Matrix* m, char* line) 
 {
@@ -75,15 +80,95 @@ static int process_line(Matrix* m, char* line)
   return 1;
 }
 
-void print_matrix( Matrix *m) 
+Buffer* serialize_matrix(const Matrix *m) {
+  if (!m) return NULL; // TODO: Extend handling
+
+  uint32_t alias_len  = strlen(m->alias);
+  uint32_t total_size = sizeof(uint32_t) +    // Size of alias
+                        alias_len +           // Alias
+                        sizeof(uint32_t) +    // Cols
+                        sizeof(uint32_t) +    // Rows
+                        sizeof(double) * m->number_of_cols * m->number_of_rows; // Matrix
+
+  unsigned char *buf_data = malloc(total_size);
+  if (!buf_data) return NULL; // TODO: Extend handling
+
+  unsigned char *p = buf_data;
+  memcpy(p, &alias_len, sizeof(uint32_t));           p += sizeof(uint32_t);
+  memcpy(p, m->alias, alias_len);                    p += alias_len;
+  memcpy(p, &m->number_of_cols, sizeof(uint32_t));   p += sizeof(uint32_t);
+  memcpy(p, &m->number_of_rows, sizeof(uint32_t));   p += sizeof(uint32_t);
+  memcpy(p, m->matrix, sizeof(double) * m->number_of_cols * m->number_of_rows);
+
+  Buffer *buf = malloc(sizeof(Buffer));
+  if (!buf) {
+    free(buf_data);
+    return NULL;
+  }
+
+  buf->data = buf_data;
+  buf->length = total_size;
+
+  return buf;
+}
+
+Matrix *deserialize_matrix(const Buffer *buf) {
+  if (!buf || !buf->data || buf->length < sizeof(uint32_t) * 3)
+    return NULL;
+
+  const unsigned char *p = buf->data;
+
+  uint32_t alias_len;
+  memcpy(&alias_len, p, sizeof(uint32_t));
+  p += sizeof(uint32_t);
+
+  if (buf->length < sizeof(uint32_t) + alias_len + 2 * sizeof(uint32_t))
+    return NULL;
+
+  Matrix *m = malloc(sizeof(Matrix));
+  if (!m) return NULL;
+
+  m->alias = malloc(alias_len + 1);
+  if (!m->alias) {
+    free(m);
+    return NULL;
+  }
+  memcpy(m->alias, p, alias_len);
+  m->alias[alias_len] = '\0';
+  p += alias_len;
+
+  memcpy(&m->number_of_cols, p, sizeof(uint32_t));
+  p += sizeof(uint32_t);
+  memcpy(&m->number_of_rows, p, sizeof(uint32_t));
+  p += sizeof(uint32_t);
+
+  size_t matrix_size = sizeof(double) * m->number_of_cols * m->number_of_rows;
+  if ((size_t)(p - buf->data) + matrix_size > buf->length) {
+    free(m->alias);
+    free(m);
+    return NULL;
+  }
+
+  m->matrix = malloc(matrix_size);
+  if (!m->matrix) {
+    free(m->alias);
+    free(m);
+    return NULL;
+  }
+
+  memcpy(m->matrix, p, matrix_size);
+  return m;
+}
+
+void print_matrix(Matrix *m) 
 {
+  printf("%s:\n", m->alias);
   for (uint i = 0; i < m->number_of_rows; i++) {
     for (uint j = 0; j < m->number_of_cols; j++) 
       printf("%lf ", m->matrix[i * m->number_of_cols + j]);
     
     printf("\n");
   }
-
 }
 
 Matrix* input_matrix()
@@ -123,6 +208,10 @@ Matrix* input_matrix()
   }
 
   putchar('\n');
+  
+  if(!feof(stdin)) {
+
+  }
 
   return m;
 }
