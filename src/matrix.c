@@ -2,7 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "matrix.h"
+
+#include "../headers/matrix.h"
 
 #define APROX_ZERO 1e-10
 

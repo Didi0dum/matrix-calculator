@@ -1,10 +1,11 @@
+#include <stddef.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "crypt.h"
-#include "matrix.h"
+#include "../headers/crypt.h"
+#include "../headers/matrix.h"
 
 typedef union {
   uint32_t words[16]; 
@@ -20,17 +21,6 @@ static void load_constant(state *st)
   st->matrix[0][3] = 0x6b206574; // "te k"
 }
 
-static int save_key(const char *filename, state *st) 
-{
-  FILE *f = fopen(filename, "wb");
-  if (!f) return -1; 
-
-  size_t written = fwrite(&st->matrix[1][0], sizeof(uint32_t), 8, f);
-  fclose(f);
-
-  return (written == 8) ? 0 : -2;
-}
-
 static int load_key(const char *filename, state *st) 
 {
   FILE *f = fopen(filename, "rb");
@@ -40,6 +30,14 @@ static int load_key(const char *filename, state *st)
   fclose(f);
 
   return (read == 8) ? 0 : -2;
+}
+
+static int generate_nonce(state *st) 
+{
+  for(int i = 1; i < 4; ++i)
+    st->matrix[3][i] = 0;
+
+  return 0;
 }
 
 static int read_nonce(FILE *in, state *st)
@@ -52,14 +50,6 @@ static int read_nonce(FILE *in, state *st)
   return (written == 12) ? 0 : -2;
 }
 
-int generate_nonce(state *st) 
-{
-  for(int i = 1; i < 4; ++i)
-    st->matrix[3][i] = 0;
-
-  return 0;
-}
-
 static void quarter_round(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d) 
 {
   *a += *b; *d ^= *a; *d = (*d << 16) | (*d >> (32 - 16));
@@ -68,8 +58,42 @@ static void quarter_round(uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d)
   *c += *d; *b ^= *c; *b = (*b << 7) | (*b >> (32 - 7));
 }
 
-static state chacha20_block(const state *st) 
+void generate_key(const char *keyfile)
 {
+  FILE* urandom = fopen("/dev/urandom", "rb");
+  if(!urandom) {
+    fprintf(stderr, "File open error: %s\n", __func__);
+    fclose(urandom);
+    return;
+  }
+
+  unsigned char buffer[256];
+
+  size_t bytes_read = fread(buffer, 1, sizeof(buffer), urandom);
+  fclose(urandom);
+
+  if (bytes_read != sizeof(buffer)) {
+    fprintf(stderr, "/dev/urandom read error: %s", __func__);
+    return;
+  }
+
+  FILE *key = fopen(keyfile, "wb");
+  if (!key) {
+    fprintf(stderr, "File open error: %s\n", __func__);
+    fclose(key);
+    return;
+  }
+
+  size_t bytes_written = fwrite(buffer, 1, sizeof(buffer), key);
+  fclose(key);
+
+  if (bytes_written != sizeof(buffer)) {
+    fprintf(stderr, "Key save to file error %s\n", __func__);
+    return;
+  }
+}
+
+    static state chacha20_block(const state *st) {
   state working_state = *st;
   for (int i = 0; i < 10; i++) {
 
@@ -92,7 +116,8 @@ static state chacha20_block(const state *st)
   return working_state;
 }
 
-Buffer* chacha20_encrypt(const char *keyfile, const Matrix* m) {
+Buffer* chacha20_encrypt(const char *keyfile, const Matrix* m) 
+{
   state st;
   Buffer* buf = serialize_matrix(m);
   Buffer* output = (Buffer*)malloc(sizeof(Buffer));
@@ -136,7 +161,8 @@ Buffer* chacha20_encrypt(const char *keyfile, const Matrix* m) {
   return output;
 }
 
-Matrix *chacha20_decrypt(const char *keyfile, Buffer *encrypted_buf) {
+Matrix *chacha20_decrypt(const char *keyfile, Buffer *encrypted_buf) 
+{
   if (encrypted_buf->length < 12)
     return NULL;
 

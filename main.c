@@ -1,16 +1,20 @@
 #include <stdio.h>
 
-#include "crypt.h"
-#include "matrix.h"
-#include "io.h"
+#include "headers/crypt.h"
+#include "headers/matrix.h"
+#include "headers/io.h"
 
 int main(int argc, char *argv[]) {
 
   Matrix *m1 = input_matrix();
-  char* filename = "m1.matrix";
+  char* filename = "m1.matrixenc";
   print_matrix(m1);
   printf("Saivng matrix to file %s\n", filename);
-  save_matrix(m1, filename);
+  generate_key("proba.key");
+  save_matrix_enctypted(m1, filename, "proba.key");
+  Matrix* m2 = load_matrix_encrypted(filename, "proba.key");
+
+  print_matrix(m2);
 
   // multiply_by_scalar(m1, 2.0);
   // puts("After scalar multiplication by 2:");
