@@ -32,10 +32,24 @@ static int load_key(const char *filename, state *st)
   return (read == 8) ? 0 : -2;
 }
 
-static int generate_nonce(state *st) 
-{
-  for(int i = 1; i < 4; ++i)
-    st->matrix[3][i] = 0;
+int generate_nonce(state *st) {
+  FILE *urandom = fopen("/dev/urandom", "rb");
+  if (!urandom) {
+    fprintf(stderr, "File open error: %s\n", __func__);
+    return -1;
+  }
+
+  uint32_t nonce[3];
+  size_t bytes_read = fread(nonce, sizeof(uint32_t), 3, urandom);
+  fclose(urandom);
+
+  if (bytes_read != 3) {
+    fprintf(stderr, "/dev/urandom read error: %s\n", __func__);
+    return -1;
+  }
+
+  for (int i = 1; i < 4; ++i)
+    st->matrix[3][i] = nonce[i - 1];
 
   return 0;
 }
