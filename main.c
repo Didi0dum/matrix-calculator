@@ -1,58 +1,132 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "headers/crypt.h"
-#include "headers/matrix.h"
 #include "headers/io.h"
+#include "headers/matrix.h"
 
-int main(int argc, char *argv[]) {
+void show_menu() {
+  printf("\n=== MENU ===\n");
+  printf("1. Enter a new matrix\n");
+  printf("2. Show current matrix\n");
+  printf("3. Multiply by scalar\n");
+  printf("4. Save to plain file\n");
+  printf("5. Save to encrypted file\n");
+  printf("6. Load from plain file\n");
+  printf("7. Load from encrypted file\n");
+  printf("8. Exit\n");
+  printf("Choose an option: ");
+}
 
-  Matrix *m1 = input_matrix();
-  char* filename = "m1.matrixenc";
-  print_matrix(m1);
-  printf("Saivng matrix to file %s\n", filename);
-  generate_key("proba.key");
-  save_matrix_enctypted(m1, filename, "proba.key");
-  Matrix* m2 = load_matrix_encrypted(filename, "proba.key");
+int main() {
+  Matrix *current = NULL;
+  int choice;
 
-  print_matrix(m2);
+  char filename[256];
+  char keyfile[256];
+  double scalar;
 
-  // multiply_by_scalar(m1, 2.0);
-  // puts("After scalar multiplication by 2:");
-  // print_matrix(m1);
+  while (1) {
+    show_menu();
+    if (scanf("%d", &choice) != 1) {
+      fprintf(stderr, "Invalid input. Exiting.\n");
+      break;
+    }
 
-  // divide_by_scalar(m1, 2.0);
-  // puts("After scalar division by 2 :");
-  // print_matrix(m1);
+    switch (choice) {
+    case 1:
+      if (current) {
+        free_matrix(current);
+      }
+      printf("Enter a new matrix:\n");
+      current = input_matrix();
+      break;
 
-//   Matrix *m3 = transpose_matrix(m1);
-//   puts("Transpose of matrix:");
-//   print_matrix(m3);
+    case 2:
+      if (current) {
+        printf("Current matrix:\n");
+        print_matrix(current);
+      } else {
+        printf("No matrix loaded.\n");
+      }
+      break;
 
-//   Matrix *m4 = multiply_by_matrix(m1, m3);
-//   puts("Multiplication of m1 and transpose:");
-//   print_matrix(m4);
+    case 3:
+      if (!current) {
+        printf("No matrix loaded.\n");
+        break;
+      }
+      printf("Enter scalar: ");
+      scanf("%lf", &scalar);
+      multiply_by_scalar(current, scalar);
+      printf("Matrix after multiplication:\n");
+      print_matrix(current);
+      break;
 
-  // double det = find_the_determinant(m1);
-  // printf("Determinant of m1: %lf\n", det);
+    case 4:
+      if (!current) {
+        printf("No matrix to save.\n");
+        break;
+      }
+      printf("Enter filename to save to: ");
+      scanf("%s", filename);
+      save_matrix(current, filename);
+      printf("Saved to '%s'.\n", filename);
+      break;
 
-//   Matrix *m5 = inverse_matrix(m1);
-//   if (m5) {
-//     puts("Inverse of m1:");
-//     print_matrix(m5);
-//   } else 
-//     puts("Matrix m1 is non-invertible.");
-  
+    case 5:
+      if (!current) {
+        printf("No matrix to save.\n");
+        break;
+      }
+      printf("Enter encrypted output filename: ");
+      scanf("%s", filename);
+      printf("Enter key file name (will be generated): ");
+      scanf("%s", keyfile);
+      generate_key(keyfile);
+      save_matrix_enctypted(current, filename, keyfile);
+      printf("Encrypted and saved to '%s' with key '%s'.\n", filename, keyfile);
+      break;
 
-//   Matrix *m6 = init_matrix("Matrix B", data, 2, 2);
-//   int status = gaussian_elimination(m6);
-//   printf("After Gaussian elimination (status: %d):\n", status);
-//   print_matrix(m6);
+    case 6:
+      if (current) {
+        free_matrix(current);
+      }
+      printf("Enter filename to load from: ");
+      scanf("%s", filename);
+      current = load_matrix(filename);
+      if (current)
+        printf("Matrix loaded successfully.\n");
+      else
+        printf("Failed to load matrix.\n");
+      break;
 
-free_matrix(m1);
-//   free_matrix(m3);
-//   free_matrix(m4);
-//   free_matrix(m5);
-//   free_matrix(m6);
+    case 7:
+      if (current) {
+        free_matrix(current);
+      }
+      printf("Enter encrypted input filename: ");
+      scanf("%s", filename);
+      printf("Enter key file name: ");
+      scanf("%s", keyfile);
+      current = load_matrix_encrypted(filename, keyfile);
+      if (current)
+        printf("Matrix decrypted and loaded successfully.\n");
+      else
+        printf("Decryption or loading failed.\n");
+      break;
+
+    case 8:
+      printf("Exiting.\n");
+      if (current)
+        free_matrix(current);
+      return 0;
+
+    default:
+      printf("Invalid choice.\n");
+      break;
+    }
+  }
 
   return 0;
 }
